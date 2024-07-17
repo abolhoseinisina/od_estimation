@@ -21,8 +21,7 @@ def draw_graph(G):
 
     plt.figure(figsize=(10, 20))
     nx.draw(graph, positions, node_size=5, node_color="b", edge_color="grey")
-    plt.tight_layout()
-    plt.savefig(f'{config['output_folder']}/network.jpg', dpi=100)
+    plt.savefig(f'{config['output_folder']}/network.jpg', bbox_inches='tight', dpi=100)
 
 def graph_to_link_path_incidence(G: nx.DiGraph, od_list: list):
     print('graph_to_link_path_incidence')
