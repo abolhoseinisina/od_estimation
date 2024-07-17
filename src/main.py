@@ -81,11 +81,31 @@ def get_roads_graph(road_shapefile_path: str) -> nx.DiGraph:
         attributes.loc[index] = [edge[2]['AADT'], edge[2]['AADTT'], edge[2]['TTPG']]
     
     return graph, attributes
+
+def get_ods_geometry():
+    ods: geopandas.GeoDataFrame = geopandas.read_file(config['ods_shapefile'])
+    return ods.to_crs(config['projected_crs'])
+
+def get_ods_graph_nodes(graph):
+    print('get_ods_graph_nodes')
+    ods = get_ods_geometry()
+    od_coordinates = [[point.x, point.y] for point in ods['geometry']]
+
+    nodes = graph.nodes()
+    positions = {node: (node[0], node[1]) for node in nodes}
+    od_ids = []
+    for od_coordinate in od_coordinates:
+        id = min(positions, key=lambda node: math.hypot(od_coordinate[0]-positions[node][0], od_coordinate[1]-positions[node][1]))
+        od_ids.append(id)
+    
+    return od_ids, ods['PCNAME'].values
+
 if __name__ == "__main__":
     G = nx.graph_atlas(150)
     graph, attributes = get_roads_graph(config['roads_shapefile'])
     draw_graph(graph)
-    draw_graph(G, flows)
+    od_nodes, od_names = get_ods_graph_nodes(graph)
+    flows = attributes['AADTT'].values
 
     od_nodes = [0, 1, 2]
     link_path_matrix = graph_to_link_path_incidence(G, od_nodes)
