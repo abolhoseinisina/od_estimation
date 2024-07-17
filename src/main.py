@@ -27,16 +27,16 @@ def graph_to_link_path_incidence(G: nx.DiGraph, od_list: list):
 
     return A
 
-def max_entropy_od_estimation(A, flow, num_zones):
-    num_paths = A.shape[1]
+def max_entropy_od_estimation(link_path_matrix, flow, num_zones):
+    num_paths = link_path_matrix.shape[1]
 
-    A_reduced = A[A.sum(axis=1) > 0]
-    flow_reduced = flow[A.sum(axis=1) > 0]
+    link_path_matrix_reduced = link_path_matrix[link_path_matrix.sum(axis=1) > 0]
+    flow_reduced = flow[link_path_matrix.sum(axis=1) > 0]
 
     def ls_objective(x):
         lambda_entropy = 1
         entropy_term = lambda_entropy * np.sum(x * np.log(x))
-        least_squares_term = 0.5 * np.sum((A_reduced @ x - flow_reduced) ** 2)
+        least_squares_term = 0.5 * np.sum((link_path_matrix_reduced @ x - flow_reduced) ** 2)
         return entropy_term + least_squares_term
     
     x0 = np.ones(num_paths) / num_paths
@@ -62,8 +62,8 @@ if __name__ == "__main__":
     draw_graph(G, flows)
 
     od_nodes = [0, 1, 2]
-    A = graph_to_link_path_incidence(G, od_nodes)
-    od_matrix = max_entropy_od_estimation(A, flows, len(od_nodes))
+    link_path_matrix = graph_to_link_path_incidence(G, od_nodes)
+    od_matrix = max_entropy_od_estimation(link_path_matrix, flows, len(od_nodes))
 
     print("Estimated OD Matrix:")
     print(od_matrix)
