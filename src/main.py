@@ -107,9 +107,11 @@ if __name__ == "__main__":
     od_nodes, od_names = get_ods_graph_nodes(graph)
     flows = attributes['AADTT'].values
 
-    od_nodes = [0, 1, 2]
-    link_path_matrix = graph_to_link_path_incidence(G, od_nodes)
+    link_path_matrix = graph_to_link_path_incidence(graph, od_nodes)
     od_matrix = max_entropy_od_estimation(link_path_matrix, flows, len(od_nodes))
 
+    od_result = pandas.DataFrame(od_matrix, columns=od_names, index=od_names)
     print("Estimated OD Matrix:")
-    print(od_matrix)
+    print(od_result)
+
+    od_result.to_csv(config['output_folder'] + '/od_matrix.csv')
