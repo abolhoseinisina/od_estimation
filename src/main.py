@@ -26,7 +26,7 @@ def draw_graph(G):
 
 def graph_to_link_path_incidence(G: nx.DiGraph, od_list: list):
     print('graph_to_link_path_incidence')
-    paths = [nx.shortest_path(G, o, d) for o in od_list for d in od_list if o != d]
+    paths = [nx.shortest_path(G, o, d, 'mm_len') for o in od_list for d in od_list if o != d]
     edges = list(G.edges)
     
     num_paths = len(paths)
