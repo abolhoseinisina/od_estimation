@@ -8,6 +8,11 @@ from config import config
 from matplotlib import pyplot as plt
 from scipy.optimize import minimize, least_squares
 
+def create_directories():
+    print('create_directories')
+    if not os.path.exists(config['output_folder']):
+        os.makedirs(config['output_folder'])
+
 def draw_graph(G):
     print('draw_graph')
     positions = {}
