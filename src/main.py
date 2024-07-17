@@ -39,7 +39,7 @@ def graph_to_link_path_incidence(G: nx.DiGraph, od_list: list):
 
     return A
 
-def max_entropy_od_estimation(link_path_matrix, flow, num_zones):
+def max_entropy_od_estimation(link_path_matrix, flow, num_zones, lambda_entropy: int = 1):
     print('max_entropy_od_estimation')
     num_paths = link_path_matrix.shape[1]
 
@@ -47,16 +47,15 @@ def max_entropy_od_estimation(link_path_matrix, flow, num_zones):
     flow_reduced = flow[link_path_matrix.sum(axis=1) > 0]
 
     def ls_objective(x):
-        lambda_entropy = 1
         entropy_term = lambda_entropy * np.sum(x * np.log(x))
         least_squares_term = 0.5 * np.sum((link_path_matrix_reduced @ x - flow_reduced) ** 2)
         return entropy_term + least_squares_term
     
     x0 = np.ones(num_paths) / num_paths
-    result = least_squares(ls_objective, x0, bounds=(0, np.inf))
+    # result = least_squares(ls_objective, x0, bounds=(0, np.inf))
     
     bounds = [(0, np.inf)] * num_paths
-    # result = minimize(ls_objective, x0, bounds=bounds, method='SLSQP', options={'disp': True})
+    result = minimize(ls_objective, x0, bounds=bounds, method='SLSQP', options={'disp': True, 'maxiter': 1000})
 
     od_matrix = np.zeros((num_zones, num_zones))
     index = 0
@@ -67,6 +66,34 @@ def max_entropy_od_estimation(link_path_matrix, flow, num_zones):
                 index += 1
 
     return od_matrix
+
+def grid_search_lambda(link_path_matrix, flow, lambda_values):
+    print('grid_search_lambda')
+    num_paths = link_path_matrix.shape[1]
+
+    link_path_matrix_reduced = link_path_matrix[link_path_matrix.sum(axis=1) > 0]
+    flow_reduced = flow[link_path_matrix.sum(axis=1) > 0]
+
+    best_lambda = None
+    best_score = float('inf')
+
+    for lambda_entropy in lambda_values:
+        def objective(x):
+            entropy_term = lambda_entropy * np.sum(x * np.log(x))
+            least_squares_term = 0.5 * np.sum((link_path_matrix_reduced @ x - flow_reduced) ** 2)
+            return entropy_term + least_squares_term
+
+        x0 = np.ones(num_paths) / num_paths
+        bounds = [(0, np.inf)] * num_paths
+        result = minimize(objective, x0, bounds=bounds, method='SLSQP', options={'maxiter': 1000})
+
+        if result.success:
+            score = result.fun
+            if score < best_score:
+                best_score = score
+                best_lambda = lambda_entropy
+
+    return best_lambda, best_score
 
 def get_roads_graph(road_shapefile_path: str) -> nx.DiGraph:
     print('get_roads_graph')
@@ -107,7 +134,12 @@ if __name__ == "__main__":
     flows = attributes['AADTT'].values
 
     link_path_matrix = graph_to_link_path_incidence(graph, od_nodes)
-    od_matrix = max_entropy_od_estimation(link_path_matrix, flows, len(od_nodes))
+    
+    lambda_values = [0.01, 0.1, 1.0, 10.0]
+    best_lambda, best_score = grid_search_lambda(link_path_matrix, flows, lambda_values)
+    print('best_lambda', best_lambda, 'best_score', best_score)
+
+    od_matrix = max_entropy_od_estimation(link_path_matrix, flows, len(od_nodes), best_lambda)
 
     od_result = pandas.DataFrame(od_matrix, columns=od_names, index=od_names)
     print("Estimated OD Matrix:")
