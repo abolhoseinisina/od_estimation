@@ -1,3 +1,6 @@
 {
-    "roads_shapefile": "data/MB Roads/Multi-model TTPG Estimation.shp"
+    "ods_shapefile": "data/Manitoba Cities Centres 2016.shp",
+    "roads_shapefile": "data/Multi-model TTPG Estimation.shp",
+    "projected_crs": 26914,
+    "output_folder": "data/output"
 }
