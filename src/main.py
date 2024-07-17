@@ -25,6 +25,7 @@ def draw_graph(G):
     plt.savefig(f'{config['output_folder']}/network.jpg', dpi=100)
 
 def graph_to_link_path_incidence(G: nx.DiGraph, od_list: list):
+    print('graph_to_link_path_incidence')
     paths = [nx.shortest_path(G, o, d) for o in od_list for d in od_list if o != d]
     edges = list(G.edges)
     
@@ -40,6 +41,7 @@ def graph_to_link_path_incidence(G: nx.DiGraph, od_list: list):
     return A
 
 def max_entropy_od_estimation(link_path_matrix, flow, num_zones):
+    print('max_entropy_od_estimation')
     num_paths = link_path_matrix.shape[1]
 
     link_path_matrix_reduced = link_path_matrix[link_path_matrix.sum(axis=1) > 0]
