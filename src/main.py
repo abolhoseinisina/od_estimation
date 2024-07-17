@@ -101,7 +101,7 @@ def get_ods_graph_nodes(graph):
     return od_ids, ods['PCNAME'].values
 
 if __name__ == "__main__":
-    G = nx.graph_atlas(150)
+    create_directories()
     graph, attributes = get_roads_graph(config['roads_shapefile'])
     draw_graph(graph)
     od_nodes, od_names = get_ods_graph_nodes(graph)
