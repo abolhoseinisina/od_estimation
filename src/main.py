@@ -69,10 +69,22 @@ def max_entropy_od_estimation(link_path_matrix, flow, num_zones):
 
     return od_matrix
 
+def get_roads_graph(road_shapefile_path: str) -> nx.DiGraph:
+    print('get_roads_graph')
+    roads: geopandas.GeoDataFrame = geopandas.read_file(road_shapefile_path)
+    roads.to_crs(config['projected_crs'], inplace=True)
+    graph = momepy.gdf_to_nx(roads)
+    graph = graph.to_directed()
+
+    attributes = pandas.DataFrame(columns=['AADT', 'AADTT', 'TTPG'])
+    for index, edge in enumerate(graph.edges(data=True)):
+        attributes.loc[index] = [edge[2]['AADT'], edge[2]['AADTT'], edge[2]['TTPG']]
+    
+    return graph, attributes
 if __name__ == "__main__":
     G = nx.graph_atlas(150)
-    G = G.to_directed()
-    flows = np.array([randint(1, 10) for i in range(len(G.edges()))])
+    graph, attributes = get_roads_graph(config['roads_shapefile'])
+    draw_graph(graph)
     draw_graph(G, flows)
 
     od_nodes = [0, 1, 2]
