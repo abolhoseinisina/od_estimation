@@ -1,16 +1,23 @@
+import os
+import math
+import momepy
 import numpy as np
 import networkx as nx
-from random import randint
+import pandas, geopandas
+from config import config
 from matplotlib import pyplot as plt
 from scipy.optimize import minimize, least_squares
 
-def draw_graph(G, flow):
-    layout = nx.planar_layout(G)
-    nx.draw_networkx_nodes(G, pos=layout)
-    nx.draw_networkx_edges(G, layout, edge_color="grey", connectionstyle='arc3,rad=0.08')
-    nx.draw_networkx_labels(G, pos=layout)
-    nx.draw_networkx_edge_labels(G, pos=layout, connectionstyle='arc3,rad=0.08', edge_labels={(edge[0], edge[1]): flow[i] for i, edge in enumerate(G.edges())})
-    plt.show()
+def draw_graph(G):
+    print('draw_graph')
+    positions = {}
+    for node in G.nodes():
+        positions[node] = [node[0], node[1]]
+
+    plt.figure(figsize=(10, 20))
+    nx.draw(graph, positions, node_size=5, node_color="b", edge_color="grey")
+    plt.tight_layout()
+    plt.savefig(f'{config['output_folder']}/network.jpg', dpi=100)
 
 def graph_to_link_path_incidence(G: nx.DiGraph, od_list: list):
     paths = [nx.shortest_path(G, o, d) for o in od_list for d in od_list if o != d]
