@@ -1,6 +1,8 @@
 {
     "ods_shapefile": "data/Manitoba Cities Centres 2016.shp",
+    "ods_shapefile_zone_name_column": "PCNAME",
     "roads_shapefile": "data/Multi-model TTPG Estimation.shp",
+    "roads_shapefile_flow_column": "AADTT",
     "projected_crs": 26914,
     "output_folder": "data/output"
 }
