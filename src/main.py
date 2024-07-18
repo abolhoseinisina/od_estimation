@@ -6,6 +6,7 @@ import networkx as nx
 import pandas, geopandas
 from config import config
 from matplotlib import pyplot as plt
+from sklearn.preprocessing import MaxAbsScaler
 from scipy.optimize import minimize, least_squares
 
 def create_directories():
@@ -56,6 +57,9 @@ def max_entropy_od_estimation(link_path_matrix, flow, num_zones, lambda_entropy:
     
     bounds = [(0, np.inf)] * num_paths
     result = minimize(ls_objective, x0, bounds=bounds, method='SLSQP', options={'disp': True, 'maxiter': 1000})
+    
+    rmse = np.sqrt(np.sum((link_path_matrix_reduced @ result.x - flow_reduced) ** 2)/ len(result.x))
+    print('RMSE', rmse)
 
     od_matrix = np.zeros((num_zones, num_zones))
     index = 0
@@ -129,9 +133,12 @@ def get_ods_graph_nodes(graph):
 if __name__ == "__main__":
     create_directories()
     graph, attributes = get_roads_graph(config['roads_shapefile'])
-    draw_graph(graph)
+    # draw_graph(graph)
+    
+    scaler = MaxAbsScaler()
     od_nodes, od_names = get_ods_graph_nodes(graph)
     flows = attributes['AADTT'].values
+    flows = scaler.fit_transform(flows.reshape(-1, 1)).flatten()
 
     link_path_matrix = graph_to_link_path_incidence(graph, od_nodes)
     
@@ -140,6 +147,7 @@ if __name__ == "__main__":
     print('best_lambda', best_lambda, 'best_score', best_score)
 
     od_matrix = max_entropy_od_estimation(link_path_matrix, flows, len(od_nodes), best_lambda)
+    od_matrix = scaler.inverse_transform(od_matrix.flatten().reshape(-1, 1)).reshape(od_matrix.shape)
 
     od_result = pandas.DataFrame(od_matrix, columns=od_names, index=od_names)
     print("Estimated OD Matrix:")
