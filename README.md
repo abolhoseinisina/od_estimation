@@ -1,6 +1,6 @@
 **Origin-Destination (OD) Matrix Estimation using Maximum Entropy and Least-Square Error**
 
-To start using this script, you have start by creating a virtual environment:
+To start using this script, you should start by creating a virtual environment:
 
 `python -m venv [name]`
 
@@ -8,21 +8,21 @@ Then activate your virtual environment by running the following command inside t
 
 `source bin/activate`
 
-The clone this repository:
+Next, clone this repository:
 
-`git clone [repository_url]`
+`git clone https://github.com/abolhoseinisina/od_estimation.git`
 
-You have to install the requirements of this repository simply by the following command:
+Before running the script, make sure to install the requirements of this repository simply by the following command:
 
 `pip install -r [requirements_file]`
 
-Next, you are required to modify the `config.json` file to include your files. You need 2 shapefiles: 
-1. A line shapefile for the road network.
-2. A point shapefile for the origin destination nodes. All the points in the later shapefile are considered as origin and destination.
+Next, you are required to modify the `config.json` file to include your settings. You need to include paths to 2 shapefiles: 
+1. A linear shapefile for your transportation network.
+2. A point shapefile for your origin destination nodes. All the points in this shapefile are considered as origin and destination.
 
-If your shapefiles are in a coordinate CRS instead of a projection CRS, calculation can go wrong. So, you have to provide a projection CRS inside the `config.json` file based on the geographical location of your road network. If your shapefile is in a projection CRS, include the same projection EPSG code inside the config file.
+If your shapefiles are in a coordinate CRS (e.g. EPSG:4326) instead of a projection CRS (e.g. EPSG:26914), calculations can go wrong. So, you have to provide a projection CRS inside the `config.json` file based on the geographical location of your road network. If your shapefiles are already in a projection CRS, include the same projection EPSG code inside the config file. The script reprojects your shapefiles to the projection CRS you provided in the config file.
 
-Also specify a directory so that the script saves the results of the script inside that fodler.
+Also, specify a directory so that the script saves the results of the script inside that folder.
 
 After following the above steps, simply run the following command:
 
