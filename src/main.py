@@ -48,7 +48,7 @@ def max_entropy_od_estimation(link_path_matrix, flow, num_zones, lambda_entropy:
     flow_reduced = flow[link_path_matrix.sum(axis=1) > 0]
 
     def ls_objective(x):
-        entropy_term = lambda_entropy * np.sum(x * np.log(x))
+        entropy_term = lambda_entropy * np.sum(x * np.log(x + 1e-20))
         least_squares_term = 0.5 * np.sum((link_path_matrix_reduced @ x - flow_reduced) ** 2)
         return entropy_term + least_squares_term
     
@@ -83,7 +83,7 @@ def grid_search_lambda(link_path_matrix, flow, lambda_values):
 
     for lambda_entropy in lambda_values:
         def objective(x):
-            entropy_term = lambda_entropy * np.sum(x * np.log(x))
+            entropy_term = lambda_entropy * np.sum(x * np.log(x + 1e-20))
             least_squares_term = 0.5 * np.sum((link_path_matrix_reduced @ x - flow_reduced) ** 2)
             return entropy_term + least_squares_term
 
