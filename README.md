@@ -16,7 +16,7 @@ You have to install the requirements of this repository simply by the following 
 
 `pip install -r [requirements_file]`
 
-Next, you are required to modify the `config.json` file to include your files. You need 2 shapefile: 
+Next, you are required to modify the `config.json` file to include your files. You need 2 shapefiles: 
 1. A line shapefile for the road network.
 2. A point shapefile for the origin destination nodes. All the points in the later shapefile are considered as origin and destination.
 
