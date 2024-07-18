@@ -154,3 +154,4 @@ if __name__ == "__main__":
     print(od_result)
 
     od_result.to_csv(config['output_folder'] + '/od_matrix.csv')
+    print(f'\nResults are saved in {config['output_folder'] + '/od_matrix.csv'}')
