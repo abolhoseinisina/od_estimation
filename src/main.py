@@ -106,9 +106,9 @@ def get_roads_graph(road_shapefile_path: str) -> nx.DiGraph:
     graph = momepy.gdf_to_nx(roads)
     graph = graph.to_directed()
 
-    attributes = pandas.DataFrame(columns=['AADT', 'AADTT', 'TTPG'])
+    attributes = pandas.DataFrame(columns=[config['roads_shapefile_flow_column']])
     for index, edge in enumerate(graph.edges(data=True)):
-        attributes.loc[index] = [edge[2]['AADT'], edge[2]['AADTT'], edge[2]['TTPG']]
+        attributes.loc[index] = [edge[2][config['roads_shapefile_flow_column']]]
     
     return graph, attributes
 
@@ -128,21 +128,21 @@ def get_ods_graph_nodes(graph):
         id = min(positions, key=lambda node: math.hypot(od_coordinate[0]-positions[node][0], od_coordinate[1]-positions[node][1]))
         od_ids.append(id)
     
-    return od_ids, ods['PCNAME'].values
+    return od_ids, ods[config['ods_shapefile_zone_name_column']].values
 
 if __name__ == "__main__":
     create_directories()
     graph, attributes = get_roads_graph(config['roads_shapefile'])
-    # draw_graph(graph)
+    draw_graph(graph)
     
     scaler = MaxAbsScaler()
     od_nodes, od_names = get_ods_graph_nodes(graph)
-    flows = attributes['AADTT'].values
+    flows = attributes[config['roads_shapefile_flow_column']].values
     flows = scaler.fit_transform(flows.reshape(-1, 1)).flatten()
 
     link_path_matrix = graph_to_link_path_incidence(graph, od_nodes)
     
-    lambda_values = [0.01, 0.1, 1.0, 10.0]
+    lambda_values = [0.1, 1.0]
     best_lambda, best_score = grid_search_lambda(link_path_matrix, flows, lambda_values)
     print('best_lambda', best_lambda, 'best_score', best_score)
 
