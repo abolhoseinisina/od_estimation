@@ -142,12 +142,13 @@ if __name__ == "__main__":
 
     link_path_matrix = graph_to_link_path_incidence(graph, od_nodes)
     
-    lambda_values = [0.1, 1.0]
+    lambda_values = [0.1, 1.0, 10.0]
     best_lambda, best_score = grid_search_lambda(link_path_matrix, flows, lambda_values)
     print('best_lambda', best_lambda, 'best_score', best_score)
 
     od_matrix = max_entropy_od_estimation(link_path_matrix, flows, len(od_nodes), best_lambda)
     od_matrix = scaler.inverse_transform(od_matrix.flatten().reshape(-1, 1)).reshape(od_matrix.shape)
+    od_matrix = np.round(od_matrix, 0).astype(int)
 
     od_result = pandas.DataFrame(od_matrix, columns=od_names, index=od_names)
     print("Estimated OD Matrix:")
