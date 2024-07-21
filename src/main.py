@@ -47,16 +47,15 @@ def max_entropy_od_estimation(link_path_matrix, flow, num_zones, lambda_entropy:
     link_path_matrix_reduced = link_path_matrix[link_path_matrix.sum(axis=1) > 0]
     flow_reduced = flow[link_path_matrix.sum(axis=1) > 0]
 
-    def ls_objective(x):
-        entropy_term = lambda_entropy * np.sum(x * np.log(x + 1e-20))
+    def objective_function(x):
+        entropy_term = -np.sum(x * np.log(x + 1e-20))+(1e-20)
         least_squares_term = 0.5 * np.sum((link_path_matrix_reduced @ x - flow_reduced) ** 2)
-        return entropy_term + least_squares_term
+        cost_value = least_squares_term / (lambda_entropy * entropy_term)
+        return cost_value
     
     x0 = np.ones(num_paths) / num_paths
-    # result = least_squares(ls_objective, x0, bounds=(0, np.inf))
-    
-    bounds = [(0, np.inf)] * num_paths
-    result = minimize(ls_objective, x0, bounds=bounds, method='SLSQP', options={'disp': True, 'maxiter': 1000})
+    bounds = [(0, 1)] * num_paths
+    result = minimize(objective_function, x0, bounds=bounds, method='SLSQP', options={'disp': True, 'maxiter': 1000})
     
     rmse = np.sqrt(np.sum((link_path_matrix_reduced @ result.x - flow_reduced) ** 2)/ len(result.x))
     print('RMSE', rmse)
@@ -82,14 +81,15 @@ def grid_search_lambda(link_path_matrix, flow, lambda_values):
     best_score = float('inf')
 
     for lambda_entropy in lambda_values:
-        def objective(x):
-            entropy_term = lambda_entropy * np.sum(x * np.log(x + 1e-20))
+        def objective_function(x):
+            entropy_term = -np.sum(x * np.log(x + 1e-20))+(1e-20)
             least_squares_term = 0.5 * np.sum((link_path_matrix_reduced @ x - flow_reduced) ** 2)
-            return entropy_term + least_squares_term
+            cost_value = least_squares_term / (lambda_entropy * entropy_term)
+            return cost_value
 
         x0 = np.ones(num_paths) / num_paths
-        bounds = [(0, np.inf)] * num_paths
-        result = minimize(objective, x0, bounds=bounds, method='SLSQP', options={'maxiter': 1000})
+        bounds = [(0, 1)] * num_paths
+        result = minimize(objective_function, x0, bounds=bounds, method='SLSQP', options={'maxiter': 1000})
 
         if result.success:
             score = result.fun
