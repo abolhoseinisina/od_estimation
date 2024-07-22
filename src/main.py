@@ -1,26 +1,16 @@
 import os
 import math
 import momepy
+import visualizer
 import od_estimator
 import networkx as nx
 import pandas, geopandas
 from config import config
-from matplotlib import pyplot as plt
 
 def create_directories():
     print('create_directories')
     if not os.path.exists(config['output_folder']):
         os.makedirs(config['output_folder'])
-
-def draw_graph(G):
-    print('draw_graph')
-    positions = {}
-    for node in G.nodes():
-        positions[node] = [node[0], node[1]]
-
-    plt.figure(figsize=(10, 20))
-    nx.draw(graph, positions, node_size=5, node_color="b", edge_color="grey")
-    plt.savefig(f'{config['output_folder']}/network.jpg', bbox_inches='tight', dpi=100)
 
 def get_roads_graph(road_shapefile_path: str) -> nx.DiGraph:
     print('get_roads_graph')
@@ -58,7 +48,6 @@ if __name__ == "__main__":
     graph, attributes = get_roads_graph(config['roads_shapefile'])
     flows = attributes[config['roads_shapefile_flow_column']].values
     od_nodes, od_names = get_ods_graph_nodes(graph)
-    draw_graph(graph)
     
     od_result = od_estimator.estimate_od_from_graph(graph, flows, od_nodes, od_names)
     print(f"Estimated OD Matrix for {config['roads_shapefile_flow_column']}:")
@@ -66,3 +55,6 @@ if __name__ == "__main__":
 
     od_result.to_csv(config['output_folder'] + '/od_matrix.csv')
     print(f'\nResults are saved in {config['output_folder'] + '/od_matrix.csv'}')
+    
+    visualizer.draw_graph(graph, f'{config['output_folder']}/network.jpg')
+    visualizer.draw_od_chord_diagram(od_result, f'{config['output_folder']}/{config['roads_shapefile_flow_column']}_od_diagram.png')
